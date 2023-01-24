@@ -1,7 +1,6 @@
-// Gérer l'affichage des éléments sur la page d'accueil
-
-// Récupération des données via l'API
-fetch("http://localhost:3000/api/products")
+// // Gérer l'affichage des éléments sur la page d'accueil
+ 
+    fetch("http://localhost:3000/api/products/")
     .then(data => data.json())
     .then(jsonListProduit => {
         let hrefBase = "./product.html?id=";   
