@@ -1,13 +1,6 @@
 // Fonction pour le bouton commander
-function addProducts(produitsId){
-    let listProduits = getProducts(); 
-    listProduits.push(produitsId)
-    saveProduits(listProduits); 
-}; 
-
-
 function getProducts(){
-    let listProduits = localStorage.getItem("panierProduits"); 
+    let listProduits = localStorage.getItem("listProduits"); 
     if(listProduits == null){
         return []; 
     }else{
@@ -18,6 +11,19 @@ function getProducts(){
 function saveProduits(listProduits){
     localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
+function addProducts(produitsId){
+    let listProduits = getProducts();
+    let foundId = listProduits.find(p => p.id == produitsId.id);
+    let foundColor = listProduits.find(p => p.color == produitsId.color )
+    let nombreProduit = produitsId.nombre
+        if(foundId && foundColor != undefined){
+            foundId.nombre += nombreProduit
+        }else{
+        listProduits.push(produitsId); 
+        }
+    saveProduits(listProduits); 
+}; 
+
 // Récupération données pour chaque pages 
 const params = new URLSearchParams(window.location.search); 
 const idProduit = params.get("id"); 
@@ -46,12 +52,17 @@ fetch(`http://localhost:3000/api/products/${idProduit}`)
                 `<option value="${colors}">${colors}</option>` 
         }
     }); 
+//     A essayer
+// const selectColor = document.querySelector("#colors"); 
+// const colorChoice = selectColor.options[selectColor.selectedIndex].value;  
 
+// Bouton de commande et son effet 
 let commande = {
     '_id' : `${idProduit}`,
-    'color': document.querySelector("#colors").value , 
+    'color': document.querySelector("#colors").value, 
     'nombre': document.querySelector("#quantity").value, 
 }; 
+
 const boutonCommander = document.querySelector(".item__content__addButton"); 
 boutonCommander.addEventListener("click", function(){
     addProducts(commande)
