@@ -14,16 +14,19 @@ function saveProduits(listProduits){
 function addProducts(produitsId){
     let listProduits = getProducts();
     let foundId = listProduits.find(p => p.id == produitsId.id);
-    let foundColor = listProduits.find(p => p.color == produitsId.color )
-    let nombreProduit = produitsId.nombre
-        if(foundId && foundColor != undefined){
-            foundId.nombre += nombreProduit
+    let foundColor = listProduits.find(p => p.color == produitsId.color );
+    let nombreProduit = produitsId.nombre;
+    if(nombreProduit > 0){
+        if(foundId != undefined & foundColor != undefined){
+            foundId.nombre += nombreProduit; 
         }else{
-        listProduits.push(produitsId); 
+            listProduits.push(produitsId); 
         }
-    saveProduits(listProduits); 
+        saveProduits(listProduits); 
+    }  
 }; 
 
+// && produitsId.color != ""
 // Récupération données pour chaque pages 
 const params = new URLSearchParams(window.location.search); 
 const idProduit = params.get("id"); 
@@ -57,10 +60,22 @@ fetch(`http://localhost:3000/api/products/${idProduit}`)
 // const colorChoice = selectColor.options[selectColor.selectedIndex].value;  
 
 // Bouton de commande et son effet 
+
+let nombre = Number(this.document.querySelector("#quantity").value); 
+
+let colorSelected = "";  
+ 
+function color(colorSelected){
+    document.querySelector("#colors").addEventListener("change", function() {
+    colorSelected = this.value;
+    console.log(this.value) 
+});  
+} 
+
 let commande = {
     '_id' : `${idProduit}`,
-    'color': document.querySelector("#colors").value, 
-    'nombre': document.querySelector("#quantity").value, 
+    'color': colorSelected, 
+    'nombre': nombre, 
 }; 
 
 const boutonCommander = document.querySelector(".item__content__addButton"); 
@@ -68,3 +83,8 @@ boutonCommander.addEventListener("click", function(){
     addProducts(commande)
 }); 
 
+// 1. Il faut permettre d'enregistrer la couleur dans le local storage
+// 2. Les commandes avec 0 produit et/ou sans couleur sélectionner 
+// ne peuvent pas rentrer dans le local storage
+// 3. Les éléments avec une id et une couleur similaire doivent voir leur
+// nombre augmenter du montant en question  
