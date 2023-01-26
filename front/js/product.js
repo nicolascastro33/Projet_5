@@ -15,16 +15,21 @@ function addProducts(produitsId){
     let listProduits = getProducts();
     let foundId = listProduits.find(p => p.id == produitsId.id);
     let foundColor = listProduits.find(p => p.color == produitsId.color );
-    let nombreProduit = produitsId.nombre;
-    if(nombreProduit > 0){
-        if(foundId != undefined & foundColor != undefined){
-            foundId.nombre += nombreProduit; 
-        }else{
+    let nombreProduit = produitsId.number;
+    let colorProduit = produitsId.color; 
+    if(nombreProduit <= 0){
+        window.alert("Pas assez d'article");
+    }else if(colorProduit == undefined){
+        window.alert("Pas de couleur sélectionnée"); 
+    }else if(foundId != undefined & foundColor != undefined){
+            foundId.number += nombreProduit; 
+
+    }else{
             listProduits.push(produitsId); 
-        }
-        saveProduits(listProduits); 
-    }  
-}; 
+    }
+    saveProduits(listProduits); 
+}  
+; 
 
 // && produitsId.color != ""
 // Récupération données pour chaque pages 
@@ -55,36 +60,29 @@ fetch(`http://localhost:3000/api/products/${idProduit}`)
                 `<option value="${colors}">${colors}</option>` 
         }
     }); 
-//     A essayer
-// const selectColor = document.querySelector("#colors"); 
-// const colorChoice = selectColor.options[selectColor.selectedIndex].value;  
 
 // Bouton de commande et son effet 
 
-let nombre = Number(this.document.querySelector("#quantity").value); 
+let commande = {
+    '_id' : `${idProduit}`, 
+    'number' : Number(document.querySelector("#quantity").value)
+}; 
 
-let colorSelected = "";  
- 
-function color(colorSelected){
-    document.querySelector("#colors").addEventListener("change", function() {
-    colorSelected = this.value;
+const selectColor = document.querySelector("#colors"); 
+const colorChoice = selectColor.addEventListener("change", function() {
+    commande.color = this.value;
     console.log(this.value) 
 });  
-} 
 
-let commande = {
-    '_id' : `${idProduit}`,
-    'color': colorSelected, 
-    'nombre': nombre, 
-}; 
+const selectNumber = document.querySelector("#quantity"); 
+const colorNumber = selectNumber.addEventListener("change", function() {
+    commande.number = Number(this.value);
+    console.log(this.value) 
+});  
 
 const boutonCommander = document.querySelector(".item__content__addButton"); 
 boutonCommander.addEventListener("click", function(){
     addProducts(commande)
 }); 
 
-// 1. Il faut permettre d'enregistrer la couleur dans le local storage
-// 2. Les commandes avec 0 produit et/ou sans couleur sélectionner 
-// ne peuvent pas rentrer dans le local storage
-// 3. Les éléments avec une id et une couleur similaire doivent voir leur
-// nombre augmenter du montant en question  
+// 1. De bien mettre les bons éléments dans la bonne boite 
