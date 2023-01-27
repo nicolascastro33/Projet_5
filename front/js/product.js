@@ -1,3 +1,5 @@
+// import { addProducts } from "./function";
+
 // Fonction pour le bouton commander
 function getProducts(){
     let listProduits = localStorage.getItem("listProduits"); 
@@ -11,19 +13,21 @@ function getProducts(){
 function saveProduits(listProduits){
     localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
+
+
 function addProducts(produitsId){
     let listProduits = getProducts();
-    let foundId = listProduits.find(p => p.id == produitsId.id);
-    let foundColor = listProduits.find(p => p.color == produitsId.color );
+    let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
     let nombreProduit = produitsId.number;
     let colorProduit = produitsId.color; 
     if(nombreProduit <= 0){
         window.alert("Pas assez d'article");
-    }else if(colorProduit == undefined){
-        window.alert("Pas de couleur sélectionnée"); 
-    }else if(foundId != undefined & foundColor != undefined){
+    }else if(colorProduit === undefined){
+        window.alert("Pas de couleur sélectionnée");
+    }else if(colorProduit === ""){
+        window.alert("Pas de couleur sélectionnée");
+    }else if(foundId != undefined){
             foundId.number += nombreProduit; 
-
     }else{
             listProduits.push(produitsId); 
     }
@@ -31,7 +35,6 @@ function addProducts(produitsId){
 }  
 ; 
 
-// && produitsId.color != ""
 // Récupération données pour chaque pages 
 const params = new URLSearchParams(window.location.search); 
 const idProduit = params.get("id"); 
@@ -68,6 +71,10 @@ let commande = {
     'number' : Number(document.querySelector("#quantity").value)
 }; 
 
+// function couleurChoisi(commande){
+//     return commande.color
+// }
+
 const selectColor = document.querySelector("#colors"); 
 const colorChoice = selectColor.addEventListener("change", function() {
     commande.color = this.value;
@@ -75,7 +82,7 @@ const colorChoice = selectColor.addEventListener("change", function() {
 });  
 
 const selectNumber = document.querySelector("#quantity"); 
-const colorNumber = selectNumber.addEventListener("change", function() {
+const numberChoice = selectNumber.addEventListener("change", function() {
     commande.number = Number(this.value);
     console.log(this.value) 
 });  
@@ -84,5 +91,7 @@ const boutonCommander = document.querySelector(".item__content__addButton");
 boutonCommander.addEventListener("click", function(){
     addProducts(commande)
 }); 
+
+
 
 // 1. De bien mettre les bons éléments dans la bonne boite 
