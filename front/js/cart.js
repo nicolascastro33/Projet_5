@@ -1,4 +1,4 @@
-// Effacer un éléments
+// Function
 function getProducts(){
   let listProduits = localStorage.getItem("listProduits"); 
   if(listProduits == null){
@@ -7,21 +7,43 @@ function getProducts(){
       return JSON.parse(listProduits); 
   }
 }
+
 function saveProduits(listProduits){
   localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
-function deleteProducts(produitsId){
-  let listProduits = getProducts();
-  let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
-  let indexProduit = listProduits.indexOf(foundId); 
-  for(let i = 0; i < listProduits.length; i++){ 
-    if ( listProduits[i] === indexProduit) { 
-        listProduits.splice(i, 1); 
-    }
-}
-  saveProduits(listProduits); 
-} 
 
+// Function pour effacer un élément
+
+function deleteProducts(event) {
+  const element = event.target.closest('article')
+  const colorIdProduit = element.dataset.color; 
+  const idProduit = element.dataset.id; 
+  let listProduits = getProducts();
+  let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
+  const foundIdIndex = listProduits.indexOf(foundId); 
+  listProduits.splice(foundIdIndex, 1)
+  document.querySelector(".cart__item__content__settings").innerHTML = "<p>Vos articles ont bien été supprimez de votre panier</p>";   
+  saveProduits(listProduits);
+}; 
+
+// Function pour modifier le nombre d'éléments
+
+function modifierNombre(event){
+  const elementNumbre = event.target.value
+  const element = event.target.closest('article')
+  const colorIdProduit = element.dataset.color;
+  const idProduit = element.dataset.id;
+  let listProduits = getProducts();
+  let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
+  foundId.number = elementNumbre;
+  if(foundId.number > 100){
+    foundId.number = 100; 
+    window.alert("Trop d'articles dans le panier!")
+  }
+  saveProduits(listProduits);  
+ }; 
+
+//  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 
 const jsonProduitPanier = JSON.parse(produitPanier)
 if(jsonProduitPanier == null){
@@ -45,23 +67,20 @@ if(jsonProduitPanier == null){
               <div class="cart__item__content__settings">
                 <div class="cart__item__content__settings__quantity">
                   <p>Qté :</p>
-                  <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${produits.number}">
+                  <input onchange="modifierNombre(event)" type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${produits.number}">
                 </div>
                 <div class="cart__item__content__settings__delete">
-                  <p class="deleteItem">Supprimer</p>
+                  <p onclick="deleteProducts(event)" class="deleteItem">Supprimer</p>
                 </div>
               </div>
             </div>
           </article>`;
-          const dataCommande = {
-            '_id' : `${produits._id}`, 
-            'color' : produits.color, 
-        }; 
-          const boutonSupprimer = this.document.querySelector(".deleteItem"); 
-          boutonSupprimer.addEventListener("click", function(){
-          console.log("delete")
-          deleteProducts(dataCommande)
-        });
     });  
   };
-}
+}; 
+
+
+
+
+
+

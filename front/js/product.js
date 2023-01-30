@@ -16,7 +16,9 @@ function saveProduits(listProduits){
 
 
 function addProducts(produitsId){
+    // window.("Êtes-vous sûr de vouloir rajouté ces articles dans votre panier?")
     let listProduits = getProducts();
+    let confirmationCommande = document.querySelector(".item__content__addButton"); 
     let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
     let nombreProduit = produitsId.number;
     let colorProduit = produitsId.color; 
@@ -27,9 +29,12 @@ function addProducts(produitsId){
     }else if(colorProduit === ""){
         window.alert("Pas de couleur sélectionnée");
     }else if(foundId != undefined){
-            foundId.number += nombreProduit; 
-    }else{
-            listProduits.push(produitsId); 
+            foundId.number += nombreProduit;
+            document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
+        }else{
+            listProduits.push(produitsId);
+            document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
+
     }
     saveProduits(listProduits); 
 }  
@@ -65,15 +70,10 @@ fetch(`http://localhost:3000/api/products/${idProduit}`)
     }); 
 
 // Bouton de commande et son effet 
-
 let commande = {
     '_id' : `${idProduit}`, 
     'number' : Number(document.querySelector("#quantity").value)
 }; 
-
-// function couleurChoisi(commande){
-//     return commande.color
-// }
 
 const selectColor = document.querySelector("#colors"); 
 const colorChoice = selectColor.addEventListener("change", function() {
@@ -91,7 +91,3 @@ const boutonCommander = document.querySelector(".item__content__addButton");
 boutonCommander.addEventListener("click", function(){
     addProducts(commande)
 }); 
-
-
-
-// 1. De bien mettre les bons éléments dans la bonne boite 
