@@ -1,3 +1,5 @@
+// import * from "./function";
+
 // Function
 function getProducts(){
   let listProduits = localStorage.getItem("listProduits"); 
@@ -33,27 +35,28 @@ function saveProduits(listProduits){
 // Function pour effacer un élément
 
 function deleteProducts(event) {
-  const element = event.target.closest('article')
+  const element = event.target.closest('article'); 
+  const messageSuppression = event.target.closest('.cart__item__content__settings'); 
   const colorIdProduit = element.dataset.color; 
   const idProduit = element.dataset.id; 
   let listProduits = getProducts();
   let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
   const foundIdIndex = listProduits.indexOf(foundId); 
-  listProduits.splice(foundIdIndex, 1)
-  document.querySelector(".cart__item__content__settings").innerHTML = "<p>Vos articles ont bien été supprimez de votre panier</p>";   
+  listProduits.splice(foundIdIndex, 1); 
+  messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre panier`;   
   saveProduits(listProduits);
 }; 
 
 // Function pour modifier le nombre d'éléments
 
 function modifierNombre(event){
-  const elementNumbre = event.target.value
+  const elementNumber = event.target.value
   const element = event.target.closest('article')
   const colorIdProduit = element.dataset.color;
   const idProduit = element.dataset.id;
   let listProduits = getProducts();
   let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
-  foundId.number = elementNumbre;
+  foundId.number = Number(elementNumber);
   if(foundId.number > 100){
     foundId.number = 100; 
     window.alert("Trop d'articles dans le panier!")
@@ -61,6 +64,23 @@ function modifierNombre(event){
   saveProduits(listProduits);
   changementTotal();   
  }; 
+
+
+// Fonction Valider mail
+function validEmail(inputEmail) {
+  let emailRegExp = new RegExp(
+    '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g'
+  );
+
+  let small = inputEmail.nextElementSibling; 
+
+  if(emailRegExp.test(inputEmail.value)){
+    small.innerHTML = "Votre email est valide"; 
+  }else{ 
+    small.innerHTML = `Votre email est invalide`; 
+  }; 
+}
+
 
 //  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 
@@ -101,27 +121,54 @@ if(jsonProduitPanier == null){
 
 changementTotal(); 
 
+
+// Fonction POST COMMANDE
+function ajoutListenerCommande(event){
+  const listProduits = getProducts(); 
+  const data = {
+    firstName : event.target.querySelector("[name=firstName]").value, 
+    lastName : event.target.querySelector("[name=lasttName]").value, 
+    adress : event.target.querySelector("[name=adress]").value, 
+    city : event.target.querySelector("[name=city]").value, 
+    email : event.target.querySelector("[name=email]").value, 
+    orderId : listProduits, 
+  };
+  const contact = JSON.stringify(data);
+  fetch(`http://localhost:3000/api/products`), {
+    method: "POST", 
+    headers: {"Content-type": "application/json"}, 
+    body: contact, 
+  } 
+};
+
+
 // Partie Contact
-document.querySelector('.cart__order input[type="submit"]').addEventListener("click", function(){
+document.querySelector('.cart__order input[type="submit"]').addEventListener("submit", function(event){
   let valid = true; 
   const inputs = document.querySelectorAll(".cart__order input"); 
+  // Vérification des données, si elles sont conformes
   for(let input of inputs){
     valid &= input.reportValidity(); 
     if(!valid){
-      let idError = input.id; 
-      let nameError = input.name; 
-      document.querySelector(`#${idError}ErrorMsg`).innerText = `Your ${nameError}'s missing!`; 
       break;
     }
-  }; 
+  };
+  // Création array contenant les éléments à envoyer 
   if(valid){
+    ajoutListenerCommande(event); 
+    // Message de validation commande 
     window.alert("Votre message a bien été envoyé"); 
   }
 }); 
 
+// Vérifier email
+let form = document.querySelector(".cart__order__form"); 
+form.email.addEventListener('change', function() {
+  validEmail(form.email); 
+}); 
+
 
 // Finir la partie Contact
-// S'occuper de la partie total 
 // Faire le plan d'acceptation
 // créer un message de confirmation 
 

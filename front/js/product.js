@@ -18,7 +18,6 @@ function saveProduits(listProduits){
 function addProducts(produitsId){
     // window.("Êtes-vous sûr de vouloir rajouté ces articles dans votre panier?")
     let listProduits = getProducts();
-    let confirmationCommande = document.querySelector(".item__content__addButton"); 
     let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
     let nombreProduit = produitsId.number;
     let colorProduit = produitsId.color; 
@@ -29,11 +28,15 @@ function addProducts(produitsId){
     }else if(colorProduit === ""){
         window.alert("Pas de couleur sélectionnée");
     }else if(foundId != undefined){
-            foundId.number += nombreProduit;
-            document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
-        }else{
-            listProduits.push(produitsId);
-            document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
+        foundId.number += nombreProduit;
+        if(foundId.number > 100){
+            foundId.number = 100; 
+            window.alert("Trop d'articles dans le panier!")
+        }
+        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
+    }else{
+        listProduits.push(produitsId);
+        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
 
     }
     saveProduits(listProduits); 

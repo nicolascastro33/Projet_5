@@ -1,5 +1,5 @@
 // Récupérer le local storage
-function getProducts(){
+export function getProducts(){
     let listProduits = localStorage.getItem("listProduits"); 
     if(listProduits == null){
         return []; 
@@ -8,12 +8,30 @@ function getProducts(){
     }
 }
 // Sauvegardez le local storage
-function saveProduits(listProduits){
+export function saveProduits(listProduits){
     localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
+// Fonction nombre d'articles et total
+export function changementTotal(){
+    let totalQuantity = Number(""); 
+    let totalPrice = Number("");
+    let listProduits = getProducts();
+
+    for(let produits of listProduits){
+        fetch(`http://localhost:3000/api/products/${produits._id}`)
+        .then(data => data.json())
+        .then(jsonListElement => {
+        totalQuantity += Number(produits.number); 
+        totalPrice += produits.number * jsonListElement.price
+        document.querySelector("#totalPrice").innerHTML = `${totalPrice}` ; 
+        document.querySelector("#totalQuantity").innerHTML = `${totalQuantity}` ; 
+        }); 
+    };
+}; 
+
 
 // Fonction pour ajouter un produit au panier
-function addProducts(produitsId){
+export function addProducts(produitsId){
     // window.("Êtes-vous sûr de vouloir rajouté ces articles dans votre panier?")
     let listProduits = getProducts();
     let confirmationCommande = document.querySelector(".item__content__addButton"); 
@@ -37,7 +55,7 @@ function addProducts(produitsId){
 };
 
 // Function pour effacer un élément
-function deleteProducts(event) {
+export function deleteProducts(event) {
     const element = event.target.closest('article')
     const colorIdProduit = element.dataset.color; 
     const idProduit = element.dataset.id; 
@@ -50,7 +68,7 @@ function deleteProducts(event) {
   }; 
   
   // Function pour modifier le nombre d'éléments
-  function modifierNombre(event){
+export function modifierNombre(event){
     const elementNumbre = event.target.value
     const element = event.target.closest('article')
     const colorIdProduit = element.dataset.color;
@@ -59,8 +77,8 @@ function deleteProducts(event) {
     let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
     foundId.number = elementNumbre;
     if(foundId.number > 100){
-      foundId.number = 100; 
-      window.alert("Trop d'articles dans le panier!")
+        foundId.number = 100; 
+        window.alert("Trop d'articles dans le panier!")
     }
     saveProduits(listProduits);  
-   };
+    };
