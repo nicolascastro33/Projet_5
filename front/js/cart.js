@@ -12,6 +12,24 @@ function saveProduits(listProduits){
   localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
 
+ // Fonction nombre d'articles et total
+ function changementTotal(){
+  let totalQuantity = Number(""); 
+  let totalPrice = Number("");
+  let listProduits = getProducts();
+
+  for(let produits of listProduits){
+    fetch(`http://localhost:3000/api/products/${produits._id}`)
+    .then(data => data.json())
+    .then(jsonListElement => {
+      totalQuantity += Number(produits.number); 
+      totalPrice += produits.number * jsonListElement.price
+      document.querySelector("#totalPrice").innerHTML = `${totalPrice}` ; 
+      document.querySelector("#totalQuantity").innerHTML = `${totalQuantity}` ; 
+    }); 
+  };
+}; 
+
 // Function pour effacer un élément
 
 function deleteProducts(event) {
@@ -40,7 +58,8 @@ function modifierNombre(event){
     foundId.number = 100; 
     window.alert("Trop d'articles dans le panier!")
   }
-  saveProduits(listProduits);  
+  saveProduits(listProduits);
+  changementTotal();   
  }; 
 
 //  Récupération des données et affichage du panier
@@ -75,10 +94,36 @@ if(jsonProduitPanier == null){
               </div>
             </div>
           </article>`;
-    });  
+    });
+    
   };
 }; 
 
+changementTotal(); 
+
+// Partie Contact
+document.querySelector('.cart__order input[type="submit"]').addEventListener("click", function(){
+  let valid = true; 
+  const inputs = document.querySelectorAll(".cart__order input"); 
+  for(let input of inputs){
+    valid &= input.reportValidity(); 
+    if(!valid){
+      let idError = input.id; 
+      let nameError = input.name; 
+      document.querySelector(`#${idError}ErrorMsg`).innerText = `Your ${nameError}'s missing!`; 
+      break;
+    }
+  }; 
+  if(valid){
+    window.alert("Votre message a bien été envoyé"); 
+  }
+}); 
+
+
+// Finir la partie Contact
+// S'occuper de la partie total 
+// Faire le plan d'acceptation
+// créer un message de confirmation 
 
 
 
