@@ -1,86 +1,158 @@
-// import * from "./function";
+// // Function
 
-// Function
-function getProducts(){
-  let listProduits = localStorage.getItem("listProduits"); 
+async function getProducts(){
+  let listProduits = await localStorage.getItem("listProduits"); 
   if(listProduits == null){
       return []; 
   }else{
       return JSON.parse(listProduits); 
   }
-}
+};
 
-function saveProduits(listProduits){
+async function saveProduits(listProduits){
   localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
-}
+};
 
  // Fonction nombre d'articles et total
- function changementTotal(){
+async function changementTotal(){
   let totalQuantity = Number(""); 
   let totalPrice = Number("");
-  let listProduits = getProducts();
+  let listProduits = await getProducts();
 
   for(let produits of listProduits){
-    fetch(`http://localhost:3000/api/products/${produits._id}`)
+    await fetch(`http://localhost:3000/api/products/${produits._id}`)
     .then(data => data.json())
     .then(jsonListElement => {
       totalQuantity += Number(produits.number); 
       totalPrice += produits.number * jsonListElement.price
       document.querySelector("#totalPrice").innerHTML = `${totalPrice}` ; 
       document.querySelector("#totalQuantity").innerHTML = `${totalQuantity}` ; 
-    }); 
+      }); 
   };
 }; 
 
 // Function pour effacer un élément
 
-function deleteProducts(event) {
-  const element = event.target.closest('article'); 
-  const messageSuppression = event.target.closest('.cart__item__content__settings'); 
-  const colorIdProduit = element.dataset.color; 
-  const idProduit = element.dataset.id; 
-  let listProduits = getProducts();
-  let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
-  const foundIdIndex = listProduits.indexOf(foundId); 
-  listProduits.splice(foundIdIndex, 1); 
-  messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre panier`;   
-  saveProduits(listProduits);
+async function deleteProducts(event) {
+const element = event.target.closest('article'); 
+const messageSuppression = event.target.closest('.cart__item__content__settings'); 
+const colorIdProduit = element.dataset.color; 
+const idProduit = element.dataset.id; 
+let listProduits = await getProducts();
+let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
+const foundIdIndex = listProduits.indexOf(foundId); 
+listProduits.splice(foundIdIndex, 1); 
+messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre panier`;   
+saveProduits(listProduits);
 }; 
 
 // Function pour modifier le nombre d'éléments
-
-function modifierNombre(event){
+async function modifierNombre(event){
   const elementNumber = event.target.value
   const element = event.target.closest('article')
   const colorIdProduit = element.dataset.color;
   const idProduit = element.dataset.id;
-  let listProduits = getProducts();
+  let listProduits = await getProducts();
   let foundId = listProduits.find(p => (p._id == idProduit) && (p.color == colorIdProduit));
   foundId.number = Number(elementNumber);
   if(foundId.number > 100){
-    foundId.number = 100; 
-    window.alert("Trop d'articles dans le panier!")
+      foundId.number = 100; 
+      window.alert("Trop d'articles dans le panier!")
   }
   saveProduits(listProduits);
   changementTotal();   
- }; 
+}; 
+
+// Fonction Post de données
+async function postDonnees(url = '', data = {}){
+  await fetch (url, {
+      method: "POST", 
+      headers: {"Content-type": "application/json"}, 
+      body: JSON.stringify(data), 
+  })
+  .then((response) => response.json())
+  .then((data) => { 
+    localStorage.setItem("order", JSON.stringify(data)); 
+    document.location.href = "confirmation.html"; 
+    // .catch((erreur) => console.log("erreur : " + erreur)); 
+  })
+}; 
 
 
-// Fonction Valider mail
+// Fonction Validation contact
+// Valider mail
 function validEmail(inputEmail) {
   let emailRegExp = new RegExp(
-    '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g'
+      '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g'
   );
 
   let small = inputEmail.nextElementSibling; 
 
   if(emailRegExp.test(inputEmail.value)){
-    small.innerHTML = "Votre email est valide"; 
+      small.innerHTML = "Your email address is valid"; 
+      small.style.color = 'green'
   }else{ 
-    small.innerHTML = `Votre email est invalide`; 
+      small.innerHTML = "Your email address is invalid"; 
+      small.style.color = 'red'
   }; 
-}
+};
 
+// Valider autres éléments
+function validElement(input) {
+  let elementRegExp = new RegExp(
+      '^[a-zA-Z]+$', 'g'
+  );
+
+  let small = input.nextElementSibling; 
+
+  if(elementRegExp.test(input.value)){
+      small.innerHTML = `Your ${input.name} is valid`; 
+      small.style.color = 'green'
+  }else{ 
+      small.innerHTML = `Your  ${input.name} is invalid`; 
+      small.style.color = 'red'
+  }; 
+}; 
+
+// Fonction Data formulaire 
+async function getDataFormulaire(){
+  let valid = true;
+  let order = [];
+  let data = {}; 
+  const inputs = document.querySelectorAll(".cart__order input"); 
+  // Vérification des données, si elles sont conformes
+  for(let input of inputs){
+    valid &= input.reportValidity(); 
+    if(!valid){
+      break;
+    }
+  };
+  // Création array contenant les éléments à envoyer 
+  if(valid){
+    const listProduits = await getProducts(); 
+    // Création d'une liste contenant seulement les Id concernées
+    for(let produits of listProduits){
+      order.push(produits._id); 
+      };
+      data = {      
+        firstName : document.querySelector('.cart__order input[name="firstName"]').value, 
+        lastName : document.querySelector('.cart__order input[name="lastName"]').value, 
+        adress : document.querySelector('.cart__order input[name="address"]').value, 
+        city : document.querySelector('.cart__order input[name="city"]').value, 
+        email : document.querySelector('.cart__order input[name="email"]').value,
+        orderId : order
+      };
+    };
+  return data;  
+}; 
+
+async function commande(){
+  data = await getDataFormulaire(); 
+  console.log(data); 
+  await postDonnees(`http://localhost:3000/api/products/order`, data)
+    // Lien vers la page de confirmation 
+    // location.href="http://127.0.0.1:5500/front/html/confirmation.html"; 
+}; 
 
 //  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 
@@ -114,65 +186,38 @@ if(jsonProduitPanier == null){
               </div>
             </div>
           </article>`;
-    });
-    
+    }); 
   };
 }; 
 
+
 changementTotal(); 
 
-
-// Fonction POST COMMANDE
-function ajoutListenerCommande(event){
-  const listProduits = getProducts(); 
-  const data = {
-    firstName : event.target.querySelector("[name=firstName]").value, 
-    lastName : event.target.querySelector("[name=lasttName]").value, 
-    adress : event.target.querySelector("[name=adress]").value, 
-    city : event.target.querySelector("[name=city]").value, 
-    email : event.target.querySelector("[name=email]").value, 
-    orderId : listProduits, 
-  };
-  const contact = JSON.stringify(data);
-  fetch(`http://localhost:3000/api/products`), {
-    method: "POST", 
-    headers: {"Content-type": "application/json"}, 
-    body: contact, 
-  } 
-};
-
-
 // Partie Contact
-document.querySelector('.cart__order input[type="submit"]').addEventListener("submit", function(event){
-  let valid = true; 
-  const inputs = document.querySelectorAll(".cart__order input"); 
-  // Vérification des données, si elles sont conformes
-  for(let input of inputs){
-    valid &= input.reportValidity(); 
-    if(!valid){
-      break;
-    }
-  };
-  // Création array contenant les éléments à envoyer 
-  if(valid){
-    ajoutListenerCommande(event); 
-    // Message de validation commande 
-    window.alert("Votre message a bien été envoyé"); 
-  }
+ document.querySelector('.cart__order input[type="submit"]').addEventListener("click", function(event){
+  event.preventDefault(); 
+commande(); 
 }); 
 
-// Vérifier email
-let form = document.querySelector(".cart__order__form"); 
+// Vérifications Contact
+let form = document.querySelector(".cart__order__form");  
+
+form.firstName.addEventListener('change', function() {
+  validElement(form.firstName); 
+}); 
+form.lastName.addEventListener('change', function() {
+  validElement(form.lastName); 
+}); 
+form.address.addEventListener('change', function() {
+  validElement(form.address); 
+});
+form.city.addEventListener('change', function() {
+  validElement(form.city); 
+}); 
 form.email.addEventListener('change', function() {
   validEmail(form.email); 
-}); 
-
-
+});
+ 
 // Finir la partie Contact
 // Faire le plan d'acceptation
 // créer un message de confirmation 
-
-
-
-
-
