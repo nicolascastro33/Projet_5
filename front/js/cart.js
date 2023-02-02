@@ -44,6 +44,8 @@ const foundIdIndex = listProduits.indexOf(foundId);
 listProduits.splice(foundIdIndex, 1); 
 messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre panier`;   
 saveProduits(listProduits);
+document.location.href = "cart.html"; 
+
 }; 
 
 // Function pour modifier le nombre d'éléments
@@ -61,21 +63,6 @@ async function modifierNombre(event){
   }
   saveProduits(listProduits);
   changementTotal();   
-}; 
-
-// Fonction Post de données
-async function postDonnees(url = '', data = {}){
-  await fetch (url, {
-      method: "POST", 
-      headers: {"Content-type": "application/json"}, 
-      body: JSON.stringify(data), 
-  })
-  .then((response) => response.json())
-  .then((data) => { 
-    localStorage.setItem("order", JSON.stringify(data)); 
-    document.location.href = "confirmation.html"; 
-    // .catch((erreur) => console.log("erreur : " + erreur)); 
-  })
 }; 
 
 
@@ -124,7 +111,12 @@ async function getDataFormulaire(){
   for(let input of inputs){
     valid &= input.reportValidity(); 
     if(!valid){
-      break;
+      if(input.name !== "email"){
+        validElement(input);
+      }else{
+        validEmail(input);
+      }
+      break; 
     }
   };
   // Création array contenant les éléments à envoyer 
@@ -134,24 +126,40 @@ async function getDataFormulaire(){
     for(let produits of listProduits){
       order.push(produits._id); 
       };
-      data = {      
-        firstName : document.querySelector('.cart__order input[name="firstName"]').value, 
-        lastName : document.querySelector('.cart__order input[name="lastName"]').value, 
-        adress : document.querySelector('.cart__order input[name="address"]').value, 
-        city : document.querySelector('.cart__order input[name="city"]').value, 
-        email : document.querySelector('.cart__order input[name="email"]').value,
-        orderId : order
-      };
+    data = {      
+      "firstName" : document.querySelector('.cart__order input[name="firstName"]').value, 
+      "lastName" : document.querySelector('.cart__order input[name="lastName"]').value, 
+      "address" : document.querySelector('.cart__order input[name="address"]').value, 
+      "city" : document.querySelector('.cart__order input[name="city"]').value, 
+      "email" : document.querySelector('.cart__order input[name="email"]').value,
+      "orderId" : order, 
     };
-  return data;  
+    // Envoie des données vers l'api
+    await postDonnees(`http://localhost:3000/api/products/order`, data)  
+  };
 }; 
 
-async function commande(){
-  data = await getDataFormulaire(); 
-  console.log(data); 
-  await postDonnees(`http://localhost:3000/api/products/order`, data)
-    // Lien vers la page de confirmation 
-    // location.href="http://127.0.0.1:5500/front/html/confirmation.html"; 
+// Fonction Post de données
+async function postDonnees(url = '', data = {}){
+  const produits = data.orderId;
+  delete data.orderId; 
+  const contact = data; 
+  console.log(contact); 
+  console.log(produits); 
+  await fetch (url, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ contact, produits }),
+  })
+  .then((response) => response.json())
+  .then((data) => { 
+    localStorage.setItem("order", JSON.stringify(data)) 
+    // document.location.href = "confirmation.html"; 
+    // .catch((erreur) => console.log("erreur : " + erreur));
+  })
+  // .catch((erreur) => console.log("erreur : " + erreur))
 }; 
 
 //  Récupération des données et affichage du panier
@@ -196,7 +204,7 @@ changementTotal();
 // Partie Contact
  document.querySelector('.cart__order input[type="submit"]').addEventListener("click", function(event){
   event.preventDefault(); 
-commande(); 
+  getDataFormulaire(); 
 }); 
 
 // Vérifications Contact
@@ -218,6 +226,11 @@ form.email.addEventListener('change', function() {
   validEmail(form.email); 
 });
  
-// Finir la partie Contact
+
+// Problèmes
+// débugger la confirmation des éléments sur la partie contact
+// Mettre les fonctions dans la partie fonction 
+// réussir à envoyer les données à api
+
 // Faire le plan d'acceptation
 // créer un message de confirmation 
