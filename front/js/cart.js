@@ -44,7 +44,7 @@ const foundIdIndex = listProduits.indexOf(foundId);
 listProduits.splice(foundIdIndex, 1); 
 messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre panier`;   
 saveProduits(listProduits);
-document.location.href = "cart.html"; 
+setTimeout(() => {document.location.href = "cart.html"}, 500); 
 
 }; 
 
