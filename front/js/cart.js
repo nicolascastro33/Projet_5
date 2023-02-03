@@ -109,15 +109,31 @@ async function getDataFormulaire(){
   const inputs = document.querySelectorAll(".cart__order input"); 
   // Vérification des données, si elles sont conformes
   for(let input of inputs){
-    valid &= input.reportValidity(); 
-    if(!valid){
-      if(input.name !== "email"){
-        validElement(input);
-      }else{
-        validEmail(input);
-      }
+    // valid &= input.reportValidity(); 
+    let small = input.nextElementSibling; 
+    let elementRegExp = new RegExp('^[a-zA-Z]+$', 'g');
+    let emailRegExp = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g');
+    if(input.name == "email"){
+      if(emailRegExp.test(input.value)){
+        small.innerHTML = `Your ${input.name} is valid`; 
+        small.style.color = 'green'
+      }else{ 
+        small.innerHTML = `Your  ${input.name} is invalid`; 
+        small.style.color = 'red'
+        valid = false
+        break
+      }; 
+    }else if(input.id !== "order"){
+      if(elementRegExp.test(input.value)){
+      small.innerHTML = `Your ${input.name} is valid`; 
+      small.style.color = 'green'
+      }else{ 
+      small.innerHTML = `Your  ${input.name} is invalid`; 
+      small.style.color = 'red'
+      valid = false
       break; 
-    }
+      }; 
+    }; 
   };
   // Création array contenant les éléments à envoyer 
   if(valid){
@@ -161,6 +177,7 @@ async function postDonnees(url = '', data = {}){
   })
   // .catch((erreur) => console.log("erreur : " + erreur))
 }; 
+
 
 //  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 

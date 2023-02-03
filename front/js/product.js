@@ -33,15 +33,14 @@ function addProducts(produitsId){
             foundId.number = 100; 
             window.alert("Trop d'articles dans le panier!")
         }
-        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
+        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>"; 
+        saveProduits(listProduits);  
     }else{
         listProduits.push(produitsId);
-        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";   
-
-    }
-    saveProduits(listProduits); 
-}  
-; 
+        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";
+        saveProduits(listProduits);   
+    }   
+}; 
 
 // Récupération données pour chaque pages 
 const params = new URLSearchParams(window.location.search); 
