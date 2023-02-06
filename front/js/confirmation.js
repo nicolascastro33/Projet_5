@@ -1,17 +1,13 @@
 // Fonction pour récupérer et ensuite effacer le numéro de confirmation
 async function getOrderId(){
-    let order = await localStorage.getItem("order"); 
-    if(order !== undefined){
-        order = JSON.parse(order);
-    }else{
-        order = null
-    }
-    if(order !== null){
-        document.querySelector("#orderId").innerHTML = `${order}`; 
+    const params = new URLSearchParams(window.location.search); 
+    const idProduit = params.get("id"); 
+    // Vérififcation si une commande à été passé
+    if(idProduit !== null){
+        document.querySelector("#orderId").innerHTML = `${idProduit}`; 
     }else{
         document.querySelector(".confirmation").innerHTML = "Aucune commande n'a été passé"
     };
-    localStorage.removeItem("order") 
 };
 
 // Récupération numéro de commande 

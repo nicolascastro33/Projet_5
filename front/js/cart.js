@@ -46,6 +46,7 @@ messageSuppression.innerHTML = `Vos articles ont bien été supprimez de votre p
 saveProduits(listProduits);
 setTimeout(() => {document.location.href = "cart.html"}, 500); 
 
+
 }; 
 
 // Function pour modifier le nombre d'éléments
@@ -76,12 +77,17 @@ function validEmail(inputEmail) {
   let small = inputEmail.nextElementSibling; 
 
   if(emailRegExp.test(inputEmail.value)){
-      small.innerHTML = "Your email address is valid"; 
+      small.innerHTML = "Your email is valid"; 
       small.style.color = 'green'
-  }else{ 
-      small.innerHTML = "Your email address is invalid"; 
+  }else{
+    if(inputEmail.value == ""){
+      small.innerHTML = "Your email is missing"; 
       small.style.color = 'red'
-  }; 
+    }else{ 
+      small.innerHTML = "Your email is invalid"; 
+      small.style.color = 'red'
+      };
+  };     
 };
 
 // Valider autres éléments
@@ -95,49 +101,65 @@ function validElement(input) {
   if(elementRegExp.test(input.value)){
       small.innerHTML = `Your ${input.name} is valid`; 
       small.style.color = 'green'
-  }else{ 
+  }else{
+    if(input.value == ""){ 
+      small.innerHTML = `Your  ${input.name} is missing`; 
+      small.style.color = 'red'
+    }else{
       small.innerHTML = `Your  ${input.name} is invalid`; 
       small.style.color = 'red'
+    }
   }; 
 }; 
 
 // Fonction Data formulaire 
 async function getDataFormulaire(){
+  const listProduits = await getProducts(); 
   let valid = true;
   let order = [];
   let data = {}; 
   const inputs = document.querySelectorAll(".cart__order input"); 
   // Vérification des données, si elles sont conformes
   for(let input of inputs){
-    // valid &= input.reportValidity(); 
     let small = input.nextElementSibling; 
     let elementRegExp = new RegExp('^[a-zA-Z]+$', 'g');
-    let emailRegExp = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g');
+    let emailRegExp = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g'); 
+    // Vérification de l'email 
     if(input.name == "email"){
       if(emailRegExp.test(input.value)){
         small.innerHTML = `Your ${input.name} is valid`; 
         small.style.color = 'green'
-      }else{ 
-        small.innerHTML = `Your  ${input.name} is invalid`; 
-        small.style.color = 'red'
+      }else{
+        if(inputEmail.value == ""){
+          small.innerHTML = `Your  ${input.name} is missing`; 
+          small.style.color = 'red'
+        }else{
+          small.innerHTML = `Your  ${input.name} is invalid`; 
+          small.style.color = 'red'
+        }  
         valid = false
         break
       }; 
+    // Vérification des autres éléments sauf l'input submit 
     }else if(input.id !== "order"){
       if(elementRegExp.test(input.value)){
       small.innerHTML = `Your ${input.name} is valid`; 
       small.style.color = 'green'
-      }else{ 
-      small.innerHTML = `Your  ${input.name} is invalid`; 
-      small.style.color = 'red'
-      valid = false
-      break; 
+      }else{
+        if(input.value == ""){
+          small.innerHTML = `Your  ${input.name} is missing`; 
+          small.style.color = 'red'
+        }else{
+          small.innerHTML = `Your  ${input.name} is invalid`; 
+          small.style.color = 'red'
+        } 
+        valid = false
+        break; 
       }; 
     }; 
   };
   // Création array contenant les éléments à envoyer 
   if(valid){
-    const listProduits = await getProducts(); 
     // Création d'une liste contenant seulement les Id concernées
     for(let produits of listProduits){
       order.push(produits._id); 
@@ -157,27 +179,34 @@ async function getDataFormulaire(){
 
 // Fonction Post de données
 async function postDonnees(url = '', data = {}){
-  const produits = data.orderId;
+  const products = data.orderId;
   delete data.orderId; 
   const contact = data; 
   console.log(contact); 
-  console.log(produits); 
-  await fetch (url, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ contact, produits }),
-  })
-  .then((response) => response.json())
-  .then((data) => { 
-    localStorage.setItem("order", JSON.stringify(data)) 
-    // document.location.href = "confirmation.html"; 
-    // .catch((erreur) => console.log("erreur : " + erreur));
-  })
-  // .catch((erreur) => console.log("erreur : " + erreur))
+  console.log(products);
+    // Vérification si il y a des éléments dans le panier 
+  if(products == null || products.length < 1){
+    window.alert("Vous n'avez pas de produits dans votre panier!")
+  }else{
+    // Envoie des éléments dans l'api via POST
+    await fetch (url, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ contact, products }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      // Effacement du Local Storage  
+      localStorage.clear() 
+      // Redirection vers la page confirmation 
+      setTimeout(() => {document.location.href = `confirmation.html?id=${data.orderId}`}, 1000); 
+    })
+    .catch(error => console.error("Il semble qu'il y est un problème avec votre commande, veuillez réessayer plus tard"));  
+  }
 }; 
-
+// Fin des fonctions
 
 //  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 
@@ -214,8 +243,7 @@ if(jsonProduitPanier == null){
     }); 
   };
 }; 
-
-
+ 
 changementTotal(); 
 
 // Partie Contact
@@ -242,12 +270,3 @@ form.city.addEventListener('change', function() {
 form.email.addEventListener('change', function() {
   validEmail(form.email); 
 });
- 
-
-// Problèmes
-// débugger la confirmation des éléments sur la partie contact
-// Mettre les fonctions dans la partie fonction 
-// réussir à envoyer les données à api
-
-// Faire le plan d'acceptation
-// créer un message de confirmation 

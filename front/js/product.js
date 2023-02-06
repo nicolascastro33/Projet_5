@@ -1,5 +1,4 @@
-// import { addProducts } from "./function";
-
+// Fonctions
 // Fonction pour le bouton commander
 function getProducts(){
     let listProduits = localStorage.getItem("listProduits"); 
@@ -14,13 +13,13 @@ function saveProduits(listProduits){
     localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
 
-
 function addProducts(produitsId){
     // window.("Êtes-vous sûr de vouloir rajouté ces articles dans votre panier?")
     let listProduits = getProducts();
     let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
     let nombreProduit = produitsId.number;
-    let colorProduit = produitsId.color; 
+    let colorProduit = produitsId.color;
+    const confirmation = document.querySelector(".item__content");  
     if(nombreProduit <= 0){
         window.alert("Pas assez d'article");
     }else if(colorProduit === undefined){
@@ -33,14 +32,19 @@ function addProducts(produitsId){
             foundId.number = 100; 
             window.alert("Trop d'articles dans le panier!")
         }
-        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>"; 
-        saveProduits(listProduits);  
+        confirmation.innerHTML += "<p>Vos articles ont bien été rajouté à votre panier</p>"; 
+        saveProduits(listProduits);
+        setTimeout(() => {document.location.href = `product.html?id=${idProduit}`}, 1000);  
     }else{
         listProduits.push(produitsId);
-        document.querySelector(".item__content__addButton").innerHTML = "<p>Vos articles ont bien été rajouté à votre panier</p>";
+        confirmation.innerHTML += "<p>Vos articles ont bien été rajouté à votre panier</p>"
         saveProduits(listProduits);   
+        setTimeout(() => {document.location.href = `product.html?id=${idProduit}`}, 1000);
     }   
 }; 
+// Fin des fonctions
+
+
 
 // Récupération données pour chaque pages 
 const params = new URLSearchParams(window.location.search); 
@@ -80,13 +84,12 @@ let commande = {
 const selectColor = document.querySelector("#colors"); 
 const colorChoice = selectColor.addEventListener("change", function() {
     commande.color = this.value;
-    console.log(this.value) 
+    // console.log(this.value) 
 });  
 
 const selectNumber = document.querySelector("#quantity"); 
 const numberChoice = selectNumber.addEventListener("change", function() {
     commande.number = Number(this.value);
-    console.log(this.value) 
 });  
 
 const boutonCommander = document.querySelector(".item__content__addButton"); 
