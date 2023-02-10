@@ -1,5 +1,5 @@
 // // Function
-
+// Fonction obtenir le local storage
 async function getProducts(){
   let listProduits = await localStorage.getItem("listProduits"); 
   if(listProduits == null){
@@ -9,6 +9,7 @@ async function getProducts(){
   }
 };
 
+// Fonction sauver sur le local storage
 async function saveProduits(listProduits){
   localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 };
