@@ -1,6 +1,6 @@
 // Fonctions
 // Fonction pour le bouton commander
-function getProducts(){
+async function getProducts(){
     let listProduits = localStorage.getItem("listProduits"); 
     if(listProduits == null){
         return []; 
@@ -8,14 +8,14 @@ function getProducts(){
         return JSON.parse(listProduits); 
     }
 }
-
-function saveProduits(listProduits){
+// Fonction pour enregistrer le produit dans le local storage 
+async function saveProduits(listProduits){
     localStorage.setItem("listProduits", JSON.stringify(listProduits)); 
 }
 
-function addProducts(produitsId){
-    // window.("Êtes-vous sûr de vouloir rajouté ces articles dans votre panier?")
-    let listProduits = getProducts();
+// Fontion pour rajouter un produit
+async function addProducts(produitsId){
+    let listProduits = await getProducts();
     let foundId = listProduits.find(p => (p._id == produitsId._id) && (p.color == produitsId.color));
     let nombreProduit = produitsId.number;
     let colorProduit = produitsId.color;
@@ -53,27 +53,35 @@ const idProduit = params.get("id");
 fetch(`http://localhost:3000/api/products/${idProduit}`)
     .then(data => data.json())
     .then(jsonListProduit => {
-        // Création des propriétés de l'article 
+        // Message d'erreur si l'article n'existe pas
+        if(Object.keys(jsonListProduit).length === 0 && jsonListProduit.constructor === Object){
+            const errorMessage = document.querySelector(".item"); 
+            errorMessage.innerHTML = `<p>L'article ${idProduit} n'existe pas, veuillez choisir un article existant dans la page d'accueil.</p>`
+            errorMessage.style.textAlign = "center"
+        }else{
+         // Création des propriétés de l'article
         // Images
-        const lienImage = document.querySelector('.item__img');
-        const imageElement = document.createElement("img");
-        imageElement.src = jsonListProduit.imageUrl;
-        lienImage.appendChild(imageElement);
-        // Nom
-        const nomElement = document.querySelector('#title');
-        nomElement.innerText = jsonListProduit.name; 
-        // Prix
-        const prixElement = document.querySelector('#price');
-        prixElement.innerText = jsonListProduit.price; 
-        // Description
-        const descriptionElement = document.querySelector('#description');
-        descriptionElement.innerText = jsonListProduit.description; 
-        // Couleurs
-        for(let colors of jsonListProduit.colors){
-            document.querySelector("#colors").innerHTML +=
-                `<option value="${colors}">${colors}</option>` 
+            const lienImage = document.querySelector('.item__img');
+            const imageElement = document.createElement("img");
+            imageElement.src = jsonListProduit.imageUrl;
+            lienImage.appendChild(imageElement);
+            // Nom
+            const nomElement = document.querySelector('#title');
+            nomElement.innerText = jsonListProduit.name; 
+            // Prix
+            const prixElement = document.querySelector('#price');
+            prixElement.innerText = jsonListProduit.price; 
+            // Description
+            const descriptionElement = document.querySelector('#description');
+            descriptionElement.innerText = jsonListProduit.description; 
+            // Couleurs
+            for(let colors of jsonListProduit.colors){
+                document.querySelector("#colors").innerHTML +=
+                    `<option value="${colors}">${colors}</option>` 
+            }; 
         }
-    }); 
+    })
+    .catch(error => console.error("Il semble qu'il y est un problème avec cette article, veuillez réessayer plus tard"));  
 
 // Bouton de commande et son effet 
 let commande = {
@@ -81,17 +89,19 @@ let commande = {
     'number' : Number(document.querySelector("#quantity").value)
 }; 
 
+// Changement de couleur
 const selectColor = document.querySelector("#colors"); 
 const colorChoice = selectColor.addEventListener("change", function() {
     commande.color = this.value;
-    // console.log(this.value) 
 });  
 
+// Changement de nombre
 const selectNumber = document.querySelector("#quantity"); 
 const numberChoice = selectNumber.addEventListener("change", function() {
     commande.number = Number(this.value);
 });  
 
+// Fonction du clic de la commande
 const boutonCommander = document.querySelector(".item__content__addButton"); 
 boutonCommander.addEventListener("click", function(){
     addProducts(commande)

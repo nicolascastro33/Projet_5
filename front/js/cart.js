@@ -28,12 +28,12 @@ async function changementTotal(){
       totalPrice += produits.number * jsonListElement.price
       document.querySelector("#totalPrice").innerHTML = `${totalPrice}` ; 
       document.querySelector("#totalQuantity").innerHTML = `${totalQuantity}` ; 
-      }); 
-  };
+      })
+      .catch(error => console.error("Il semble qu'il y est un problème avec cette article, veuillez réessayer plus tard"));  
+    };
 }; 
 
 // Function pour effacer un élément
-
 async function deleteProducts(event) {
 const element = event.target.closest('article'); 
 const messageSuppression = event.target.closest('.cart__item__content__settings'); 
@@ -131,7 +131,7 @@ async function getDataFormulaire(){
         small.innerHTML = `Your ${input.name} is valid`; 
         small.style.color = 'green'
       }else{
-        if(inputEmail.value == ""){
+        if(input.value == ""){
           small.innerHTML = `Your  ${input.name} is missing`; 
           small.style.color = 'red'
         }else{
@@ -212,8 +212,12 @@ async function postDonnees(url = '', data = {}){
 //  Récupération des données et affichage du panier
 const produitPanier = window.localStorage.getItem("listProduits"); 
 const jsonProduitPanier = JSON.parse(produitPanier)
-if(jsonProduitPanier == null){
-  console.log()
+// Message d'erreur si il n'y a pas d'article dans le panier
+if(jsonProduitPanier.length === 0 || jsonProduitPanier === null){
+  const noArticle = document.querySelector("#cart__items")
+  noArticle.innerHTML = "Votre panier est vide pour le moment"
+  noArticle.style.textAlign = "center"
+  noArticle.style.marginBottom = "100px"
 }else{
   for(let produits of jsonProduitPanier){
     fetch(`http://localhost:3000/api/products/${produits._id}`)
@@ -241,7 +245,8 @@ if(jsonProduitPanier == null){
               </div>
             </div>
           </article>`;
-    }); 
+    })
+    .catch(error => console.error("Il semble qu'il y est un problème avec cette article, veuillez réessayer plus tard"));  
   };
 }; 
  
